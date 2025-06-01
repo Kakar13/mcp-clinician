@@ -217,7 +217,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Multi-Patient Context**: Support for multiple patient contexts
 - **Enhanced MCP Features**: Advanced context search and retrieval
 - **Integration APIs**: REST API for external system integration
-- **Mobile Interface**: React Native or Flutter mobile app
+- **Mobile Interface**: iOS App
 - **Database Backend**: PostgreSQL or MongoDB for production deployment
 - **Advanced Analytics**: Patient outcome tracking and analysis
 
@@ -241,3 +241,9 @@ If you encounter issues:
 2. Ensure all dependencies are properly installed
 3. Verify your API key is correctly configured
 4. Check the console output for detailed error messages
+
+## ⚠️ Disclaimer
+
+**THIS SYSTEM IS FOR TESTING PURPOSES ONLY**
+
+The outputs and recommendations provided by this system should not be used as health advice. This is a demonstration project intended to showcase the technical implementation of an MCP-based system and should never be used for actual medical decision-making or healthcare purposes.
