@@ -203,7 +203,7 @@ class MCPContextManager:
 
 ## ⚠️ Important Medical Disclaimers
 
-- **This system is for educational purposes only**
+- **THIS SYSTEM IS FOR TESTING PURPOSES ONLY**
 - **Not a substitute for professional medical advice**
 - **Always consult healthcare providers for medical concerns**
 - **Emergency symptoms require immediate medical attention**
@@ -241,9 +241,3 @@ If you encounter issues:
 2. Ensure all dependencies are properly installed
 3. Verify your API key is correctly configured
 4. Check the console output for detailed error messages
-
-## ⚠️ Disclaimer
-
-**THIS SYSTEM IS FOR TESTING PURPOSES ONLY**
-
-The outputs and recommendations provided by this system should not be used as health advice. This is a demonstration project intended to showcase the technical implementation of an MCP-based system and should never be used for actual medical decision-making or healthcare purposes.
