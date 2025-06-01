@@ -203,7 +203,7 @@ class MCPContextManager:
 
 ## ⚠️ Important Medical Disclaimers
 
-- **THIS SYSTEM IS FOR TESTING PURPOSES ONLY**
+- **This system is for testing purposes only**
 - **Not a substitute for professional medical advice**
 - **Always consult healthcare providers for medical concerns**
 - **Emergency symptoms require immediate medical attention**
