@@ -5,6 +5,7 @@ import re
 import os
 from typing import Dict, List, Any
 from dotenv import load_dotenv
+from utils.mcp_context import MCPContextManager
 
 load_dotenv()
 
@@ -15,6 +16,7 @@ class ClinicalDecisionSupport:
         self.symptoms_db = self._load_symptoms_db()
         self.conditions_db = self._load_conditions_db()
         self.guidelines_db = self._load_guidelines_db()
+        self.mcp_context = MCPContextManager()  # Initialize MCP context manager
         
     def _load_symptoms_db(self) -> Dict[str, List[str]]:
         """Load symptom mapping database"""
@@ -133,29 +135,50 @@ class ClinicalDecisionSupport:
     async def analyze_patient_case(self, symptoms_description: str):
         """Main function to analyze patient symptoms and provide recommendations"""
         
+        # Update MCP context with new analysis request
+        self.mcp_context.add_conversation_turn(
+            role="user",
+            content=symptoms_description,
+            metadata={"type": "symptom_analysis_request"}
+        )
+        
         # Step 1: Analyze symptoms
         normalized_symptoms = await self.normalize_symptoms(symptoms_description)
+        self.mcp_context.update_system_state("normalized_symptoms", normalized_symptoms)
         
         # Step 2: Get differential diagnosis
         differential = await self.get_differential_diagnosis(
             normalized_symptoms["normalized_symptoms"]
         )
+        self.mcp_context.update_system_state("differential_diagnosis", differential)
         
         # Step 3: Get treatment guidelines for the most likely condition
         guidelines = None
         if differential.get("conditions") and len(differential["conditions"]) > 0:
             primary_condition = differential["conditions"][0]
             guidelines = await self.get_treatment_guidelines(primary_condition)
+            self.mcp_context.update_system_state("treatment_guidelines", guidelines)
         
-        # Step 4: Generate comprehensive response using Claude
+        # Get recent context for more informed response
+        recent_context = self.mcp_context.get_context_window()
+        system_state = self.mcp_context.get_system_state()
+        
+        # Step 4: Generate comprehensive response using Claude with context
         prompt = f"""
-        Based on the following medical analysis, provide educational information:
+        Based on the following medical analysis and context, provide educational information:
         
+        Current Analysis:
         Patient Symptoms: {symptoms_description}
         Normalized Symptoms: {normalized_symptoms['normalized_symptoms']}
         Potential Conditions: {differential.get('conditions', [])}
         Urgency Level: {differential.get('urgency', 'unknown')}
         Treatment Guidelines: {guidelines}
+        
+        Context History:
+        {json.dumps(recent_context, indent=2)}
+        
+        System State:
+        {json.dumps(system_state, indent=2)}
         
         Please provide a clear, educational response that includes:
         1. A summary of what the symptoms might indicate
@@ -167,9 +190,19 @@ class ClinicalDecisionSupport:
         """
         
         response = self.client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-20250514",
             max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
+        )
+        
+        # Add system response to context
+        self.mcp_context.add_conversation_turn(
+            role="assistant",
+            content=response.content[0].text,
+            metadata={
+                "type": "analysis_response",
+                "model": "claude-sonnet-4-20250514"
+            }
         )
         
         return {
@@ -178,7 +211,8 @@ class ClinicalDecisionSupport:
                 "differential": differential,
                 "guidelines": guidelines
             },
-            "clinical_response": response.content[0].text
+            "clinical_response": response.content[0].text,
+            "context": recent_context
         }
 
 # Usage example
